@@ -58,18 +58,8 @@ def algo():
     # print(adj_copy)
 
     ans = max_flow(adj, task_num, node_num, sw_node, routing)
-    print(adj)
-    print(adj_copy)
-    sum1 = 0
-    sum2 = 0
-    for i in range(node_num):
-        for j in range(node_num):
-            # sum1 += sum(adj[i][j])
-            # sum2 += sum(adj_copy[i][j])
-            sum1 += adj[i][j][0]
-            sum2 += adj_copy[i][j][0]
-    print(sum1)
-    print(sum2)
+
+    check_result(adj, adj_copy, task_num, node_num, sw_node, routing)
     print(ans)
 
 
@@ -252,8 +242,70 @@ def max_flow(adj, task_num, node_num, sw_node, routing):
 
     return ans
 
-def check_result(adj,adj_copy):
 
+def check_result(adj, adj_copy, task_num, node_num, sw_node, routing):
+    print(node_num)
+
+    index = 0
+    # 添加起点  0
+    node_map = []
+    node_find = dict()
+    node_map.append("start")
+    node_find["start"] = index
+    index += 1
+
+    # 添加终点  1
+    node_map.append("end")
+    node_find["end"] = index
+    index += 1
+
+    # 添加 sw 点
+    for sw in sw_node:
+        node_map.append(sw)
+        node_find[sw] = index
+        index += 1
+
+        name = sw + "x"
+        node_map.append(name)
+        node_find[name] = index
+
+        index += 1
+    sort_task_and_subflow()
+    for taskID in range(task_num):
+        for i, r in enumerate(routing):
+            name = "task " + str(taskID) + " subflow " + str(i)
+            node_map.append(name)
+            node_find[name] = index
+            index += 1
+
+    # 首先检查分流量限制是否满足
+
+    index_shift = 42
+    for taskID in range(task_num):
+        for i, r in enumerate(routing):
+            for res in range(resource):
+                tot = adj[index_shift + i][0][res]
+                cmp = 0
+                for k, sw in enumerate(sw_node):
+                    cmp += adj[node_find[sw]][index_shift + i][res]
+                if abs(tot - cmp) > 1E-7:
+                    print("ERROR")
+                else:
+                    print("RIGHT")
+
+    # 然后检查边的容量限制
+    for res in range(resource):
+        for k, sw in enumerate(sw_node):
+            if adj[node_find[sw + "x"]][node_find[sw]][res] > capacity[sw][res] or \
+                    adj[1][node_find[sw + "x"]][res] > capacity[sw][res] or \
+                    adj[1][node_find[sw + "x"]][res] != adj[node_find[sw + "x"]][node_find[sw]][res]:
+                print("ERROR")
+            else:
+                print(adj[1][node_find[sw + "x"]][res])
+                print(adj[node_find[sw + "x"]][node_find[sw]][res])
+                print("RIGHT")
+
+    return adj, adj_copy
 
 
 def update_adj(adj, s, t, usage, f, type1):
