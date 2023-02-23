@@ -44,9 +44,32 @@ def algo():
     node_num = 1 + 1 + len(sw_node) * 2 + task_num * len(routing)
 
     # 创建图 adj_copy用于对比
+
     adj, adj_copy = build_graph(capacity, task_num, node_num, sw_node, routing)
+    sum1 = 0
+    sum2 = 0
+    for i in range(node_num):
+        for j in range(node_num):
+            sum1 += sum(adj[i][j])
+            sum2 += sum(adj_copy[i][j])
+    print(sum1)
+    print(sum2)
+    # print(adj)
+    # print(adj_copy)
 
     ans = max_flow(adj, task_num, node_num, sw_node, routing)
+    print(adj)
+    print(adj_copy)
+    sum1 = 0
+    sum2 = 0
+    for i in range(node_num):
+        for j in range(node_num):
+            # sum1 += sum(adj[i][j])
+            # sum2 += sum(adj_copy[i][j])
+            sum1 += adj[i][j][0]
+            sum2 += adj_copy[i][j][0]
+    print(sum1)
+    print(sum2)
     print(ans)
 
 
@@ -79,8 +102,8 @@ def build_graph(capacity, task_num, node_num, sw_node, routing):
         node_map.append(name)
         node_find[name] = index
 
-        adj[index - 1][index] = capacity[sw]
-        adj[index][1] = capacity[sw]
+        adj[index - 1][index] = capacity[sw][:]
+        adj[index][1] = capacity[sw][:]
         index += 1
 
     # 按照优先级排序
@@ -103,15 +126,17 @@ def build_graph(capacity, task_num, node_num, sw_node, routing):
             index += 1
 
     print(len(adj))
-    for n, nn in enumerate(adj[:10]):
-        print(str(n) + ": ", end="")
-        print(nn)
+    # for n, nn in enumerate(adj[:10]):
+    #     print(str(n) + ": ", end="")
+    #     print(nn)
 
     adj_copy = [[adj[j][i].copy() for i in range(node_num)] for j in range(node_num)]
+    #
+    # for n, nn in enumerate(adj_copy[:10]):
+    #     print(str(n) + ": ", end="")
+    #     print(nn)
 
-    for n, nn in enumerate(adj_copy[:10]):
-        print(str(n) + ": ", end="")
-        print(nn)
+    # adj_copy = [[adj[j][i] for i in range(node_num)] for j in range(node_num)]
     return adj, adj_copy
 
 
@@ -120,7 +145,7 @@ def max_flow(adj, task_num, node_num, sw_node, routing):
     f_each_task = len(routing)
     ans = 0
 
-    # 从优先级高的任务开始
+    # 从优先级高的任务开始 bfs
     for i, t in enumerate(tasks):
         print(t)
         # 每个任务遍历
@@ -128,15 +153,19 @@ def max_flow(adj, task_num, node_num, sw_node, routing):
         task_usage = t.usage
         for f in range(index_start, index_start + f_each_task):
             res = routing[f - index_start][-1]
-            while res > 10E-7:
-                pre = [0 for i in range(node_num)]
-                if bfs(adj, f, 1, node_num, task_usage, pre):
+            while res > 1E-7:
+                pre = [0 for _ in range(node_num)]
+                vis = [0 for i in range(node_num)]
+                # if bfs(adj, f, 1, node_num, task_usage, pre, vis):
+                vis[0] = 1
+                pre[f] = 0
+                if dfs(adj, f, 1, f, node_num, task_usage, pre, vis):
 
                     # 回溯找到可以增广的最大路径
-                    now = 1
 
                     # 寻找可以增广的最大流量
                     mind = float('inf')
+                    now = 1
                     while now != 0:
                         last = pre[now]
                         mind = min_capacity(adj[last][now], mind, task_usage)
@@ -147,33 +176,110 @@ def max_flow(adj, task_num, node_num, sw_node, routing):
                     ans += mind
 
                     # 更新残差网络
-                    now = 1
                     print(mind)
                     print(res)
+                    print(ans)
+                    now = 1
                     while now != 0:
                         last = pre[now]
                         update_adj(adj, last, now, task_usage, mind, -1)
                         update_adj(adj, now, last, task_usage, mind, 1)
                         now = last
-                    print("333")
+                    print()
                 else:
                     break
+
+    # dfs
+    # for i, t in enumerate(tasks):
+    #     print(t)
+    #     # 每个任务遍历
+    #     index_start = 2 + len(sw_node) * 2 + i * f_each_task
+    #     task_usage = t.usage
+    #     while True:
+    #         pre = [0 for _ in range(node_num)]
+    #         vis = [0 for _ in range(node_num)]
+    #         # if bfs(adj, f, 1, node_num, task_usage, pre, vis):
+    #         # vis[0] = 1
+    #         pre[0] = 0
+    #         if dfs(adj, 0, 1, 0, node_num, task_usage, pre, vis):
+    #             # 回溯找到可以增广的最大路径
+    #
+    #             # 寻找可以增广的最大流量
+    #             mind = float('inf')
+    #             now = 1
+    #             while now != 0:
+    #                 print(now, end=" ")
+    #                 last = pre[now]
+    #                 mind = min_capacity(adj[last][now], mind, task_usage)
+    #
+    #                 now = last
+    #             print()
+    #             ans += mind
+    #
+    #             # 更新残差网络
+    #             print(mind)
+    #             print(ans)
+    #             now = 1
+    #             last = pre[now]
+    #             sum1 = 0
+    #             for ii in range(node_num):
+    #                 for jj in range(node_num):
+    #                     # sum1 += sum(adj[ii][jj])
+    #                     sum1 += adj[ii][jj][0]
+    #             print(sum1)
+    #             while now != 0:
+    #                 last = pre[now]
+    #                 print(last,end=" ")
+    #                 print(now)
+    #                 print(adj[last][now][0])
+    #                 print(adj[2][3][0])
+    #                 update_adj(adj, last, now, task_usage, mind, -1.0)
+    #                 update_adj(adj, now, last, task_usage, mind, 1.0)
+    #                 print(adj[last][now][0])
+    #                 print(adj[2][3][0])
+    #                 now = last
+    #
+    #             sum1 = 0
+    #             for ii in range(node_num):
+    #                 for jj in range(node_num):
+    #                     # sum1 += sum(adj[ii][jj])
+    #                     sum1 += adj[ii][jj][0]
+    #             print(sum1)
+    #             print()
+    #         else:
+    #             print("no dfs")
+    #             break
+
     return ans
 
+def check_result(adj,adj_copy):
 
-def update_adj(adj, s, t, usage, f, type):
-    #  1加 -1捡
+
+
+def update_adj(adj, s, t, usage, f, type1):
+    #  1加 -1减
     for i in range(resource):
         if usage[i] > 0:
-            adj[s][t][i] += type * usage[i] * f
-            if abs(adj[s][t][i]) < 10E-7:
+            adj[s][t][i] = adj[s][t][i] + type1 * usage[i] * f
+            if abs(adj[s][t][i]) < 1E-7:
                 adj[s][t][i] = 0
 
 
-# def dfs(adj, s, t, node_num, usage, pre):
-#
-def bfs(adj, s, t, node_num, usage, pre):
-    vis = [0 for i in range(node_num)]
+def dfs(adj, s, t, now, node_num, usage, pre, vis):
+    if now == t:
+        return True
+    else:
+        vis[now] = 1
+        for i in range(1, node_num):
+            if check_capacity(usage, adj[now][i]) and vis[i] == 0:
+                pre[i] = now
+                if dfs(adj, s, t, i, node_num, usage, pre, vis):
+                    return True
+
+        return False
+
+
+def bfs(adj, s, t, node_num, usage, pre, vis):
     # pre = [0 for i in node_num]
 
     vis[0] = 1
