@@ -38,19 +38,11 @@ def get_routing():
             tmp = line.split()
             if len(tmp) == 5:
                 tmp = tmp[:3]
-                # i = int(tmp[0][-1])
-                # j = int(tmp[-1][-1])
-                # if j < i:
-                #     continue
-                tmp.append(2)
+                tmp.append(0.2)
                 routing.append(tmp[:])
             else:
                 tmp = tmp[:5]
-                tmp.append(1)
-                # i = int(tmp[0][-1])
-                # j = int(tmp[-1][-1])
-                # if j < i:
-                #     continue
+                tmp.append(0.1)
                 routing.append(tmp[:])
     return routing
 
