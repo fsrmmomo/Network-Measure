@@ -38,7 +38,8 @@ def get_routing():
             tmp = line.split()
             if len(tmp) == 5:
                 tmp = tmp[:3]
-                tmp.append(0.2)
+                tmp.append(0.1)
+                # tmp.append([0.2])
                 routing.append(tmp[:])
             else:
                 tmp = tmp[:5]

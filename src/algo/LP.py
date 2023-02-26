@@ -3,25 +3,25 @@ from cplex.exceptions import CplexError
 
 from utils.util import *
 from src.algo.base import Task, read_capaticy
+from src.algo.params import *
 
-tasks = []
-capacity = dict()
 
-# 资源种类数目
-resource = 1
 
-maxnum = 99999999
 
 
 def algo():
-    task1 = Task(0, [1])
+    task1 = Task(0, [1,4])
+    task2 = Task(1, [3,1])
+    task3 = Task(2, [2,2])
     tasks.append(task1)
+    tasks.append(task2)
+    tasks.append(task3)
     global capacity
     # 得到sw的容量
     capacity = read_capaticy()
 
     LP_algo_continous()
-    LP_algo_integer()
+    # LP_algo_integer()
 
 
 def LP_algo_continous():
@@ -251,14 +251,22 @@ def LP_algo_integer():
     sw_count = dict()
     for sw in sws:
         sw_count[sw] = 0
+
+    task_c = dict()
     for i in range(len(x)):
         print(X[i], end=": ")
         print(x[i])
 
         sw = X[i].split("-")[-1].split(" ")[1]
-        print(sw)
+        # print(sw)
         sw_count[sw] = sw_count[sw] + x[i]
+        tt = X[i].split("-")[0]
+        if tt in task_c.keys():
+            task_c[tt] += x[i]
+        else:
+            task_c[tt] = x[i]
     print(sw_count)
+    print(task_c)
     print(sum(x))
 
 if __name__ == '__main__':
