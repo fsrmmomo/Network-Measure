@@ -2,7 +2,7 @@ import cplex
 from cplex.exceptions import CplexError
 
 from utils.util import *
-from src.algo.base import Task, read_capaticy
+from src.algo.base import Task, read_capacity
 from src.algo.params import *
 
 
@@ -10,18 +10,18 @@ from src.algo.params import *
 
 
 def algo():
-    task1 = Task(0, [1,4])
-    task2 = Task(1, [3,1])
-    task3 = Task(2, [2,2])
-    tasks.append(task1)
-    tasks.append(task2)
-    tasks.append(task3)
-    global capacity
-    # 得到sw的容量
-    capacity = read_capaticy()
+    # task1 = Task(0, [1,4])
+    # task2 = Task(1, [3,1])
+    # task3 = Task(2, [2,2])
+    # tasks.append(task1)
+    # tasks.append(task2)
+    # tasks.append(task3)
+    # global capacity
+    # # 得到sw的容量
+    # capacity = read_capacity()
 
-    LP_algo_continous()
-    # LP_algo_integer()
+    # LP_algo_continous()
+    LP_algo_integer()
 
 
 def LP_algo_continous():
@@ -42,6 +42,8 @@ def LP_algo_continous():
     my_ub = []
     # 流变量
     v_count = 0
+    print(routing)
+    print(capacity)
     for i, task in enumerate(tasks):
         for j, r in enumerate(routing):
             # for sw in sws:
@@ -49,7 +51,7 @@ def LP_algo_continous():
                 # for k in range(resource):
                 name = "task {0}-routing {1}-sw {2}".format(i, j, sw)
                 X.append(name)
-                my_ub.append(r[-1])
+                my_ub.append(int(r[-1]))
                 v_count += 1
                 # print(name)
 
@@ -143,17 +145,22 @@ def LP_algo_continous():
     # print('x: ')
     # print(x)
 
-def LP_algo_integer():
+def LP_algo_integer(routing,capacity,resource):
+    # print(routing)
+    # print(capacity)
+    print("ilp re:" + str(resource))
 
-    mutil = 1E6
+    # mutil = 1E6
     # 目标函数
-    routing = get_routing()
+    # routing = get_routing()
 
     # 子流数目
     sub_flow_count = len(routing)
 
     # 任务数目
     tasks_count = len(tasks)
+    # for t in tasks:
+    #     print(t.usage)
 
     # 交换机数目
     sws = get_sw_node_list()
@@ -170,10 +177,10 @@ def LP_algo_integer():
                 # for k in range(resource):
                 name = "task {0}-routing {1}-sw {2}".format(i, j, sw)
                 X.append(name)
-                my_ub.append(int(r[-1]*mutil))
+                my_ub.append(int(r[-1]))
                 v_count += 1
                 # print(name)
-
+    # print(v_count)
     # v_count = tasks_count*sub_flow_count*sw_count
     my_obj = [1 for _ in range(v_count)]
     my_lb = [0 for _ in range(v_count)]
@@ -198,7 +205,7 @@ def LP_algo_integer():
             cons.append([1 for i in tmp])
 
             rows.append(cons)
-            my_rhs.append(int(r[-1]*mutil))
+            my_rhs.append(int(r[-1]))
             my_rownames.append("task {0}-routing {1}constraint".format(i, j))
 
     # prob.linear_constraints.add(lin_expr=rows, senses="L" * len(rows),
@@ -220,42 +227,44 @@ def LP_algo_integer():
                             name = "task {0}-routing {1}-sw {2}".format(i, j, sw)
                             tmp_x.append(name)
                             tmp_a.append(task.usage[res])
+                            # print(task.usage[res])
             cons.append(tmp_x)
             cons.append(tmp_a)
             rows.append(cons)
-            my_rhs.append(int(capacity[sw][res]*mutil))
+            my_rhs.append(int(capacity[sw][res]))
             my_rownames.append("sw {0}-res {1}".format(sw, res))
     prob.linear_constraints.add(lin_expr=rows, senses="L" * len(rows),
                                 rhs=my_rhs, names=my_rownames)
     prob.linear_constraints.get_rows()
+    prob.set_results_stream(None)
     try:
         prob.solve()
     except CplexError as exc:
         print(exc)
     print()
     # solution.get_status() returns an integer code
-    print("Solution status = ", prob.solution.get_status(), ":", end=' ')
+    # print("Solution status = ", prob.solution.get_status(), ":", end=' ')
     # the following line prints the corresponding string
-    print(prob.solution.status[prob.solution.get_status()])
-    print("Solution value  = ", prob.solution.get_objective_value())
+    # print(prob.solution.status[prob.solution.get_status()])
+    # print("Solution value  = ", prob.solution.get_objective_value())
 
     numcols = prob.variables.get_num()
     numrows = prob.linear_constraints.get_num()
-    print(numcols)
-    print(numrows)
+    # print(numcols)
+    # print(numrows)
 
     slack = prob.solution.get_linear_slacks()
     x = prob.solution.get_values()
-    print(len(x))
-    print(v_count)
+    # print(len(x))
+    # print(v_count)
     sw_count = dict()
     for sw in sws:
         sw_count[sw] = 0
 
     task_c = dict()
     for i in range(len(x)):
-        print(X[i], end=": ")
-        print(x[i])
+        # print(X[i], end=": ")
+        # print(x[i])
 
         sw = X[i].split("-")[-1].split(" ")[1]
         # print(sw)
@@ -265,9 +274,12 @@ def LP_algo_integer():
             task_c[tt] += x[i]
         else:
             task_c[tt] = x[i]
-    print(sw_count)
-    print(task_c)
+    # print(sw_count)
+    # print(task_c)
+    # print(len(x))
+
     print(sum(x))
+    return sum(x)
 
 if __name__ == '__main__':
     algo()
