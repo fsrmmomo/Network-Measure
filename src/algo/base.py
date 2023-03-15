@@ -925,25 +925,17 @@ def one_task_m_resource(mode="0000"):
     set_routing(routing, new_fd_list)
 
     # 第一个仿真，根据使用资源数量
-def m_task_one_resource(mode="0000"):
+def m_task_one_resource(mode="10000"):
     global resource
     resource = 1
     # task1 = Task(0, [1])
     global tasks
     tasks.clear()
     # tasks.append(task1)
-
     global capacity
     # 得到sw的容量
     capacity = read_capacity()
-
-    # new_clist = [[1E6 + 120000 for _ in range(resource)] for _ in range(len(capacity))]
-    # set_capacity(capacity, new_clist)
-
-
     routing = get_routing()
-    # new_fd_list = [1E5 for _ in range(len(routing))]
-    # set_routing(routing, new_fd_list)
 
     tt = get_task_file()
 
@@ -954,13 +946,13 @@ def m_task_one_resource(mode="0000"):
         new_clist = get_step_clist_same_node()
         new_fd_list = get_same_f()
         #
-        for i in range(10):
+        for i in range(1):
             # 流和c不变
             set_capacity(capacity, new_clist[2]) # 使用总资源0.6比例，更好观察效果
             set_routing(routing, new_fd_list)
             tmp = []
             for j in range(1):
-                new_tasks = tt[i+1][1][j]
+                new_tasks = tt[i+1][1][2]
                 tasks.clear()
                 tasks.extend(new_tasks)
                 c_ans = base(routing)
@@ -1094,5 +1086,5 @@ if __name__ == '__main__':
     # get_diff_f()
     # get_dif_task(5,3)
     # get_task_file()
-    m_task_one_resource("00011")
+    m_task_one_resource()
 

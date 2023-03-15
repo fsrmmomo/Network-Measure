@@ -1089,7 +1089,7 @@ def m_task_m_resource(mode="00000"):
     tt = get_task_file()
     # 都默认使用4个任务
     # 第一个仿真，根据使用资源数量，0.6C，相同流和相同分布
-    mm = 2
+    mm = 1
     if mm==1:
         times = 5
     else:
