@@ -15,25 +15,29 @@ def read_ms():
         data.append(tmp)
     pkl_write("../../result/ms",data)
 
-def read_ms():
+def read_ms2():
 
     prefix = "../../result/ms-"
     data = []
     for i in range(1,6):
-        filename = "../../result/ms-"+str(i)
+        filename = "../../result/ms-"+str(i)+"1"
         tmp = []
         with open(filename,'r') as f:
             for line in f.readlines():
-                tmp.append(float(line[1:-2]))
-                print(float(line[1:-2]))
+                out = line.replace('[', '').replace(']', '')
+                dlist = out.split(',')
+                dlist = [float(d) for d in dlist]
+                print(dlist)
+                tmp.append(mean(dlist))
+                # print(float(line[1:-2]))
         data.append(tmp)
-    pkl_write("../../result/ms",data)
+    print(data)
+    # pkl_write("../../result/ms",data)
 
 def read_mm():
     # prefix = "../../result/mm-"+str(i)+"2"
     data = []
-    data.append([])
-    for i in range(2,6):
+    for i in range(1,6):
         filename1 = "../../result/mm-"+str(i)+"1"
         print(filename1)
         tmp = []
@@ -104,3 +108,4 @@ def read_mm():
 if __name__ == '__main__':
     # read_ms()
     read_mm()
+    # read_ms2()

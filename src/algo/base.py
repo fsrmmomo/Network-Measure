@@ -925,7 +925,7 @@ def one_task_m_resource(mode="0000"):
     set_routing(routing, new_fd_list)
 
     # 第一个仿真，根据使用资源数量
-def m_task_one_resource(mode="11111"):
+def m_task_one_resource(mode="10000"):
     global resource
     resource = 1
     # task1 = Task(0, [1])
@@ -955,16 +955,18 @@ def m_task_one_resource(mode="11111"):
                 new_tasks = tt[i+1][1][j]
                 tasks.clear()
                 tasks.extend(new_tasks)
-                c_ans = base(routing)
-                # lp_ans = LP_algo_integer(routing, capacity, resource)
-                print(c_ans)
+                # c_ans = base(routing)
+                lp_ans = LP_algo_integer(routing, capacity, resource)
+                print(lp_ans)
+                tmp.append(lp_ans)
+                # print(c_ans)
                 # print(lp_ans)
                 # print(c_ans / lp_ans)
-                tmp.append(c_ans)
+                # tmp.append(c_ans)
                 # tmp.append(c_ans / lp_ans)
             result.append(tmp)
         print(result)
-        plain_save("../../result/ms-11", result)
+        plain_save("../../result/ms-12", result)
 
     # 4个任务下，资源为1，f相同，c相同，资源占比改变的计算结果
     if mode[1] == "1":
@@ -984,7 +986,7 @@ def m_task_one_resource(mode="11111"):
                 tmp.append(compute(new_clist[i],new_fd_list,resource,routing))
             result.append(tmp)
         print(result)
-        plain_save("../../result/ms-21",result)
+        plain_save("../../result/ms-22",result)
 
     # 4个任务下，资源为1，f相同，c不相同，资源占比改变的计算结果
     if mode[2] == "1":
@@ -1014,7 +1016,7 @@ def m_task_one_resource(mode="11111"):
 
             result.append(tmp)
         print(result)
-        plain_save("../../result/ms-31", result)
+        plain_save("../../result/ms-32", result)
 
 
     # 4个任务下，资源为1，f不同，c相同，资源占比改变的计算结果
@@ -1036,7 +1038,7 @@ def m_task_one_resource(mode="11111"):
 
             result.append(tmp)
         print(result)
-        plain_save("../../result/ms-41",result)
+        plain_save("../../result/ms-42",result)
 
     # 4个任务下，资源为1，f不同，c不同，资源占比改变的计算结果
     if mode[4] == "1":
@@ -1057,7 +1059,7 @@ def m_task_one_resource(mode="11111"):
 
             result.append(tmp)
         print(result)
-        plain_save("../../result/ms-51",result)
+        plain_save("../../result/ms-52",result)
 
 def plain_save(filename,result):
     with open(filename, "w") as f:
