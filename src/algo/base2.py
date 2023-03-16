@@ -1253,5 +1253,5 @@ if __name__ == '__main__':
     # get_diff_f()
     # get_dif_task(5,3)
     # get_task_file()
-    m_task_m_resource("01111")
+    m_task_m_resource("10000")
 
