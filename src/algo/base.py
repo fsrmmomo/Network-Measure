@@ -925,7 +925,7 @@ def one_task_m_resource(mode="0000"):
     set_routing(routing, new_fd_list)
 
     # 第一个仿真，根据使用资源数量
-def m_task_one_resource(mode="10000"):
+def m_task_one_resource(mode="11111"):
     global resource
     resource = 1
     # task1 = Task(0, [1])
@@ -1071,10 +1071,10 @@ def compute(new_clist,new_fd_list,resource,routing):
     global capacity
     set_capacity(capacity, new_clist)
     set_routing(routing,new_fd_list)
-    c_ans = base(routing)
-    # lp_ans = LP_algo_integer(routing, capacity, resource)
-    print(c_ans)
-    return c_ans
+    # c_ans = base(routing)
+    lp_ans = LP_algo_integer(routing, capacity, resource)
+    # print(c_ans)
+    return lp_ans
     # print(lp_ans)
     # print(c_ans / lp_ans)
     # tmp.append(c_ans / lp_ans)

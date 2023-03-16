@@ -1,62 +1,90 @@
 from statistics import mean
 
 from utils.util import *
-def read_ms():
 
+
+def read_ms():
     prefix = "../../result/ms-"
     data = []
-    for i in range(1,6):
-        filename = "../../result/ms-"+str(i)
+    for i in range(1, 6):
+        filename = "../../result/ms-" + str(i)
         tmp = []
-        with open(filename,'r') as f:
+        with open(filename, 'r') as f:
             for line in f.readlines():
                 tmp.append(float(line[1:-2]))
                 print(float(line[1:-2]))
         data.append(tmp)
-    pkl_write("../../result/ms",data)
+    pkl_write("../../result/ms", data)
+
 
 def read_ms2():
-
     prefix = "../../result/ms-"
     data = []
-    for i in range(1,6):
-        filename = "../../result/ms-"+str(i)+"1"
+    for i in range(1, 6):
+        filename = "../../result/ms-" + str(i) + "1"
         tmp = []
-        with open(filename,'r') as f:
+        with open(filename, 'r') as f:
             for line in f.readlines():
                 out = line.replace('[', '').replace(']', '')
                 dlist = out.split(',')
                 dlist = [float(d) for d in dlist]
                 print(dlist)
-                tmp.append(mean(dlist))
+                # tmp = dlist
+                tmp.append(dlist)
+                # tmp.append(mean(dlist))
                 # print(float(line[1:-2]))
+        tmp1 = tmp
+        filename = "../../result/ms-" + str(i) + "2"
+        tmp = []
+        with open(filename, 'r') as f:
+            for line in f.readlines():
+                out = line.replace('[', '').replace(']', '')
+                dlist = out.split(',')
+                dlist = [float(d) for d in dlist]
+                print(dlist)
+                # tmp = dlist
+                tmp.append(dlist)
+                # tmp.append(mean(dlist))
+                # print(float(line[1:-2]))
+        tmp2 = tmp
+
+        tmp = []
+        for j in range(len(tmp1)):
+            tmp.append([min(1.0, tmp1[j][i] / tmp2[j][i]) for i in range(len(tmp1[j]))])
+        print(tmp)
+
+        tmp = [mean(tt) for tt in tmp]
+        print(tmp)
         data.append(tmp)
     print(data)
-    # pkl_write("../../result/ms",data)
+    for d in data:
+        print(d)
+    pkl_write("../../result/ms2",data)
+
 
 def read_mm():
     # prefix = "../../result/mm-"+str(i)+"2"
     data = []
-    for i in range(1,6):
-        filename1 = "../../result/mm-"+str(i)+"1"
+    for i in range(1, 6):
+        filename1 = "../../result/mm-" + str(i) + "1"
         print(filename1)
         tmp = []
         algo1 = []
         algo2 = []
         algo3 = []
         algo4 = []
-        with open(filename1,'r') as f:
+        with open(filename1, 'r') as f:
             for line in f.readlines():
-                out = line.replace('[','').replace(']','')
+                out = line.replace('[', '').replace(']', '')
                 dlist = out.split(',')
                 dlist = [float(d) for d in dlist]
 
                 dots = []
                 tmp1 = []
                 tmp2 = []
-                for j in range(len(dlist)//2):
-                    tmp1.append(dlist[2*j])
-                    tmp2.append(dlist[2*j+1])
+                for j in range(len(dlist) // 2):
+                    tmp1.append(dlist[2 * j])
+                    tmp2.append(dlist[2 * j + 1])
                 algo1.append(tmp1)
                 algo2.append(tmp2)
                 #     dots.append(min(1,dlist[2*i]/dlist[2*i+1]))
@@ -64,32 +92,32 @@ def read_mm():
                 # print(mean(dots))
                 # tmp.append(mean(dots))
         filename2 = "../../result/mm-" + str(i) + "2"
-        with open(filename2,'r') as f:
+        with open(filename2, 'r') as f:
             for line in f.readlines():
-                out = line.replace('[','').replace(']','')
+                out = line.replace('[', '').replace(']', '')
                 dlist = out.split(',')
                 dlist = [float(d) for d in dlist]
                 dots = []
                 tmp3 = []
                 tmp4 = []
-                for j in range(len(dlist)//2):
-                    tmp3.append(dlist[2*j])
-                    tmp4.append(dlist[2*j+1])
+                for j in range(len(dlist) // 2):
+                    tmp3.append(dlist[2 * j])
+                    tmp4.append(dlist[2 * j + 1])
                 algo3.append(tmp3)
                 algo4.append(tmp4)
         # print(algo1)
         # print(algo2)
         # print(algo3)
         # print(algo4)
-        for j,d in enumerate(algo1):
-            for k,v in enumerate(d):
-                d[k] = v/algo4[j][k]
-        for j,d in enumerate(algo2):
-            for k,v in enumerate(d):
-                d[k] = v/algo4[j][k]
-        for j,d in enumerate(algo3):
-            for k,v in enumerate(d):
-                d[k] =min(1,v/algo4[j][k])
+        for j, d in enumerate(algo1):
+            for k, v in enumerate(d):
+                d[k] = v / algo4[j][k]
+        for j, d in enumerate(algo2):
+            for k, v in enumerate(d):
+                d[k] = v / algo4[j][k]
+        for j, d in enumerate(algo3):
+            for k, v in enumerate(d):
+                d[k] = min(1, v / algo4[j][k])
         # print(algo1)
         # print(algo2)
         # print(algo3)
@@ -105,7 +133,8 @@ def read_mm():
     print(data)
     pkl_write("../../result/mm", data)
 
+
 if __name__ == '__main__':
     # read_ms()
-    read_mm()
-    # read_ms2()
+    # read_mm()
+    read_ms2()
