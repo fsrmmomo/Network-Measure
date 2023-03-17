@@ -71,7 +71,7 @@ def algo(capacity, routing):
 
     # sort_res = sort_task_and_subflow(routing)
     sort_res = sort_task_only(routing)
-    adj, adj_copy= build_graph(capacity, task_num, node_num, sw_node, routing)
+    adj, adj_copy, adj2= build_graph(capacity, task_num, node_num, sw_node, routing)
 
     # task_num = 1
     # node_num = 1 + 1 + len(sw_node) * 2 + task_num * len(routing)
@@ -88,7 +88,7 @@ def algo(capacity, routing):
     # print(adj)
     # print(adj_copy)
 
-    ans = max_flow(adj, task_num, node_num, sw_node, routing, sort_res)
+    ans = max_flow(adj, task_num, node_num, sw_node, routing, sort_res,adj2)
 
     # check_result(adj, adj_copy, task_num, node_num, sw_node, routing)
     # get_ans(adj, adj_copy, task_num, node_num, sw_node, routing)
@@ -99,6 +99,7 @@ def algo(capacity, routing):
 def build_graph(capacity, task_num, node_num, sw_node, routing):
     # print(node_num)
     adj = [[[0 for k in range(resource)] for i in range(node_num)] for j in range(node_num)]
+    adj2 = [set() for i in range(node_num)]
 
     # adj = []
 
@@ -127,6 +128,12 @@ def build_graph(capacity, task_num, node_num, sw_node, routing):
 
         adj[index - 1][index] = capacity[sw][:]
         adj[index][1] = capacity[sw][:]
+
+        adj2[index].add(1)
+        adj2[1].add(index)
+        adj2[index - 1].add(index)
+        adj2[index].add(index-1)
+
         index += 1
 
 
@@ -139,9 +146,14 @@ def build_graph(capacity, task_num, node_num, sw_node, routing):
             # adj[0][index] = r[-1]
             adj[0][index] = [r[-1] * j for j in tasks[taskID].usage]
 
+            adj2[index].add(0)
+            adj2[0].add(index)
             # 添加subflow到对应sw的边
             for sw in r[:-1]:
                 adj[index][node_find[sw]] = [r[-1] * j for j in tasks[taskID].usage]
+
+                adj2[index].add(node_find[sw])
+                adj2[node_find[sw]].add(index)
             index += 1
 
     # print(len(adj))
@@ -156,10 +168,11 @@ def build_graph(capacity, task_num, node_num, sw_node, routing):
     #     print(nn)
 
     # adj_copy = [[adj[j][i] for i in range(node_num)] for j in range(node_num)]
-    return adj, adj_copy
+    # print(adj2)
+    return adj, adj_copy, adj2
 
 
-def max_flow(adj, task_num, node_num, sw_node, routing, sort_res):
+def max_flow(adj, task_num, node_num, sw_node, routing, sort_res,adj2):
     # 从start相邻的每个节点开始，使用BFS进行计算
     f_each_task = len(routing)
     ans = 0
@@ -181,7 +194,7 @@ def max_flow(adj, task_num, node_num, sw_node, routing, sort_res):
             pre[f] = 0
 
             # def bfs(adj, s, t, node_num, usage, pre, vis):
-            if bfs(adj, f, 1, node_num, task_usage, pre, vis):
+            if bfs(adj, f, 1, node_num, task_usage, pre, vis,adj2):
 
                 # 回溯找到可以增广的最大路径
 
@@ -214,7 +227,6 @@ def max_flow(adj, task_num, node_num, sw_node, routing, sort_res):
     # 从优先级高的任务开始 bfs
     # print(tasks)
     for i, t in enumerate(tasks):
-        print(i)
         # print("""\n\n\n\n在这里开始\n\n\n""")
         # print(t)
         # 每个任务遍历
@@ -231,7 +243,7 @@ def max_flow(adj, task_num, node_num, sw_node, routing, sort_res):
                 vis[0] = 1
                 pre[f] = 0
                 # if dfs(adj, f, 1, f, node_num, task_usage, pre, vis):
-                if bfs(adj, f, 1, node_num, task_usage, pre, vis):
+                if bfs(adj, f, 1, node_num, task_usage, pre, vis,adj2):
                     # print("""\n\n\n\n在这里找到了\n\n\n""")
 
                     # 回溯找到可以增广的最大路径
@@ -473,7 +485,8 @@ def dfs(adj, s, t, now, node_num, usage, pre, vis):
         return False
 
 
-def bfs(adj, s, t, node_num, usage, pre, vis):
+def bfs(adj, s, t, node_num, usage, pre, vis,adj2):
+    # print(adj2)
     # pre = [0 for i in node_num]
 
     vis[0] = 1
@@ -486,8 +499,11 @@ def bfs(adj, s, t, node_num, usage, pre, vis):
     while not queue.empty():
         now = queue.get()
         # 因为回到start认为总是失败的，所以直接排除0
-        for i in range(1, node_num):
+        for i in adj2[now]:
+        #     print("innin")
+        # for i in range(1, node_num):
             if vis[i] == 0 and check_capacity(usage, adj[now][i]):
+            # if vis[i] == 0 and check_capacity(usage, adj[now][i]):
                 vis[i] = 1
                 pre[i] = now
                 if i == t:
@@ -951,22 +967,23 @@ def m_task_one_resource(mode="11111"):
             set_capacity(capacity, new_clist[2]) # 使用总资源0.6比例，更好观察效果
             set_routing(routing, new_fd_list)
             tmp = []
-            for j in range(5):
+            for j in range(50):
+                print(mode[0] + " "+str(i) +" "+str(j))
                 new_tasks = tt[i+1][1][j]
                 tasks.clear()
                 tasks.extend(new_tasks)
-                # c_ans = base(routing)
+                c_ans = base(routing)
                 lp_ans = LP_algo_integer(routing, capacity, resource)
-                print(lp_ans)
-                tmp.append(lp_ans)
+                # print(lp_ans)
+                # tmp.append(lp_ans)
                 # print(c_ans)
                 # print(lp_ans)
-                # print(c_ans / lp_ans)
+                print(c_ans / lp_ans)
                 # tmp.append(c_ans)
-                # tmp.append(c_ans / lp_ans)
+                tmp.append(c_ans / lp_ans)
             result.append(tmp)
         print(result)
-        plain_save("../../result/ms-12", result)
+        plain_save("../../result/ms-1", result)
 
     # 4个任务下，资源为1，f相同，c相同，资源占比改变的计算结果
     if mode[1] == "1":
@@ -979,14 +996,15 @@ def m_task_one_resource(mode="11111"):
             # 流和c不变i
             set_capacity(capacity, new_clist[i]) #
             tmp = []
-            for j in range(5):
+            for j in range(50):
+                print(mode[1] + " " + str(i) + " " + str(j))
                 new_tasks = tt[4][1][j]
                 tasks.clear()
                 tasks.extend(new_tasks)
                 tmp.append(compute(new_clist[i],new_fd_list,resource,routing))
             result.append(tmp)
         print(result)
-        plain_save("../../result/ms-22",result)
+        plain_save("../../result/ms-2",result)
 
     # 4个任务下，资源为1，f相同，c不相同，资源占比改变的计算结果
     if mode[2] == "1":
@@ -997,11 +1015,12 @@ def m_task_one_resource(mode="11111"):
             # 流和c不变i
             tmp = []
             # k对应不同容量分布
-            for k in range(1):
+            for k in range(5):
                 # set_capacity(capacity, new_clist[i]) #
                 # set_routing(routing, new_fd_list)
                 # j 代表不同的任务序列
-                for j in range(5):
+                for j in range(10):
+                    print(mode[2] + " " + str(i)+ " " + str(k) + " " + str(j))
                     new_tasks = tt[4][1][j]
                     tasks.clear()
                     tasks.extend(new_tasks)
@@ -1016,7 +1035,7 @@ def m_task_one_resource(mode="11111"):
 
             result.append(tmp)
         print(result)
-        plain_save("../../result/ms-32", result)
+        plain_save("../../result/ms-3", result)
 
 
     # 4个任务下，资源为1，f不同，c相同，资源占比改变的计算结果
@@ -1028,9 +1047,10 @@ def m_task_one_resource(mode="11111"):
             # 流和c不变i
             tmp = []
             # k对应不同流量分布
-            for k in range(1):
+            for k in range(5):
                 # j 代表不同的任务序列
-                for j in range(5):
+                for j in range(10):
+                    print(mode[3] + " " + str(i) + " " + str(k) + " " + str(j))
                     new_tasks = tt[4][1][j]
                     tasks.clear()
                     tasks.extend(new_tasks)
@@ -1038,7 +1058,7 @@ def m_task_one_resource(mode="11111"):
 
             result.append(tmp)
         print(result)
-        plain_save("../../result/ms-42",result)
+        plain_save("../../result/ms-4",result)
 
     # 4个任务下，资源为1，f不同，c不同，资源占比改变的计算结果
     if mode[4] == "1":
@@ -1049,9 +1069,10 @@ def m_task_one_resource(mode="11111"):
             # 流和c不变i
             tmp = []
             # k对应不同流量分布
-            for k in range(1):
+            for k in range(5):
                 # j 代表不同的任务序列
-                for j in range(5):
+                for j in range(10):
+                    print(mode[4] + " " + str(i) + " " + str(k) + " " + str(j))
                     new_tasks = tt[4][1][j]
                     tasks.clear()
                     tasks.extend(new_tasks)
@@ -1059,7 +1080,7 @@ def m_task_one_resource(mode="11111"):
 
             result.append(tmp)
         print(result)
-        plain_save("../../result/ms-52",result)
+        plain_save("../../result/ms-5",result)
 
 def plain_save(filename,result):
     with open(filename, "w") as f:
@@ -1071,14 +1092,13 @@ def compute(new_clist,new_fd_list,resource,routing):
     global capacity
     set_capacity(capacity, new_clist)
     set_routing(routing,new_fd_list)
-    # c_ans = base(routing)
+    c_ans = base(routing)
     lp_ans = LP_algo_integer(routing, capacity, resource)
     # print(c_ans)
-    return lp_ans
+    # return lp_ans
     # print(lp_ans)
-    # print(c_ans / lp_ans)
-    # tmp.append(c_ans / lp_ans)
-    # return c_ans / lp_ans
+    print(c_ans / lp_ans)
+    return c_ans / lp_ans
 
 
 if __name__ == '__main__':

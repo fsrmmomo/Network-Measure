@@ -11,8 +11,13 @@ def read_ms():
         tmp = []
         with open(filename, 'r') as f:
             for line in f.readlines():
-                tmp.append(float(line[1:-2]))
-                print(float(line[1:-2]))
+                out = line.replace('[', '').replace(']', '')
+                dlist = out.split(',')
+                dlist = [float(d) for d in dlist]
+
+                tmp.append(mean(dlist))
+                # print(float(line[1:-2]))
+            print(tmp)
         data.append(tmp)
     pkl_write("../../result/ms", data)
 
@@ -135,6 +140,6 @@ def read_mm():
 
 
 if __name__ == '__main__':
-    # read_ms()
+    read_ms()
     # read_mm()
-    read_ms2()
+    # read_ms2()

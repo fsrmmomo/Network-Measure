@@ -148,7 +148,7 @@ def LP_algo_continous():
 def LP_algo_integer(routing,capacity,resource):
     # print(routing)
     # print(capacity)
-    print("ilp re:" + str(resource))
+    # print("ilp re:" + str(resource))
 
     # mutil = 1E6
     # 目标函数
